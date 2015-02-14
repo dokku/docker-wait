@@ -2,15 +2,31 @@
 
 set -e
 
-host=$(env | grep _TCP_ADDR | cut -d = -f 2)
-port=$(env | grep _TCP_PORT | cut -d = -f 2)
+host=$(env | grep _TCP_ADDR | cut -d = -f 2 | sed -n 1p)
+ports=$PORTS
 
-echo -n "waiting for TCP connection to $host:$port..."
+if [ -z "$ports" ]; then
 
-while ! nc -w 1 $host $port 2>/dev/null
-do
-  echo -n .
-  sleep 1
-done
+ ports=$(env | grep _TCP_PORT | cut -d = -f 2)
 
-echo 'ok'
+ if [ $(echo $ports | wc -w) -gt 1 ]; then
+   echo 'The linked container exports more than one port. Exiting'
+   exit 1
+ fi
+fi
+
+if [ -n "$ports" ]; then
+  for port in $(echo $ports | sed -e 's/\s//g' -e 's/,/\n/g')
+  do
+    echo -n "waiting for TCP connection to $host:$port..."
+
+    while ! nc -w1 $host $port 2>/dev/null
+    do
+      echo -n .
+      sleep 1
+    done
+    echo "up!"
+  done
+fi
+
+exit
