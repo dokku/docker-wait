@@ -2,22 +2,24 @@
 
 set -e
 
-host=$(env | grep _TCP_ADDR | cut -d = -f 2 | sed -n 1p)
 ports=$PORTS
 
+# empty ports variable will default to checking for exactly one port
 if [ -z "$ports" ]; then
+  ports=$(env | grep _TCP_PORT | cut -d = -f 2)
 
- ports=$(env | grep _TCP_PORT | cut -d = -f 2)
-
- if [ $(echo $ports | wc -w) -gt 1 ]; then
-   echo 'The linked container exports more than one port. Exiting'
-   exit 1
- fi
+  if [ $(echo $ports | wc -w) -gt 1 ]; then
+    echo 'The linked container exports more than one port. Exiting'
+    exit 1
+  fi
 fi
 
+# find the host associated with each of the ports
+# and wait until that port responds
 if [ -n "$ports" ]; then
-  for port in $(echo $ports | sed -e 's/\s//g' -e 's/,/\n/g')
+  for port in $(echo $ports | sed -e 's/,/ /g' -e 's/\s+/\n/g')
   do
+    host=$(env | grep PORT_${port}_TCP_ADDR | cut -d = -f 2 | sed -n 1p)
     echo -n "waiting for TCP connection to $host:$port..."
 
     while ! nc -w1 $host $port 2>/dev/null
