@@ -2,7 +2,16 @@
 
 set -e
 
+DEFAULT_TIMEOUT=30
+
 ports=$PORTS
+
+# set the per host:port connection timeout
+if [ -n "$TIMEOUT" ]; then
+  timeout=$TIMEOUT
+else
+  timeout=$DEFAULT_TIMEOUT
+fi
 
 # empty ports variable will default to checking for exactly one port
 if [ -z "$ports" ]; then
@@ -14,20 +23,29 @@ if [ -z "$ports" ]; then
   fi
 fi
 
-# find the host associated with each of the ports
+# find the host(s) associated with each of the ports
 # and wait until that port responds
 if [ -n "$ports" ]; then
   for port in $(echo $ports | sed -e 's/,/ /g' -e 's/\s+/\n/g')
   do
-    host=$(env | grep PORT_${port}_TCP_ADDR | cut -d = -f 2 | sed -n 1p)
-    echo -n "waiting for TCP connection to $host:$port..."
-
-    while ! nc -w1 $host $port 2>/dev/null
+    for host in $(env | grep PORT_${port}_TCP_ADDR | cut -d = -f 2)
     do
-      echo -n .
-      sleep 1
+      echo -n "waiting for TCP connection to $host:$port..."
+
+      seconds=0
+      while [ "$seconds" -lt "$timeout" ] && ! nc -w1 $host $port 2>/dev/null
+      do
+        echo -n .
+        sleep 1
+        seconds=$((seconds+1))
+      done
+
+      if [ "$seconds" -lt "$timeout" ]; then
+        echo "up!"
+      else
+        echo "WARN: unable to connect"
+      fi
     done
-    echo "up!"
   done
 fi
 
