@@ -32,6 +32,39 @@ By default each connection attempt will bail after 30 seconds. You can specify a
     waiting for TCP connection to 172.17.0.105:9200...ok
     waiting for TCP connection to 172.17.0.105:32000............WARN: unable to connect
 
+**experimental usage in docker-compose.yml**
+
+I've used this utility in docker-compose yaml files in order to orchestrate a wait period when running automated tests. I don't know how it will behave in other situations!
+
+example docker-compose.yml:
+
+    db:
+      image: postgres
+      ports:
+        - "5432"
+    es:
+      image: dockerfile/elasticsearch
+      ports:
+        - "9200"
+    wait:
+      image: n3llyb0y/wait
+      environment:
+        PORTS: "5432 9200"
+      links:
+        - es
+        - db
+
+Here the `wait` container explicitly links to the db and es containers and passes on the ports required to wait for.
+
+Rather than using `docker-compose up`, instead use
+
+    docker-compose run wait
+
+This launches the linked services and backgrounds them, then returns control after the wait container finishes. It looks like this might need to be tweaked for future versions of docker-compose but as of version `1.1.0` it does just what I need.
+
+**TODO**
+The echo output seems to drop the initial `waiting for...` for subsequent hosts. This needs a workaround or better explanation of why that happens and a proper fix.
+
 credits
 
 The single port usage idea and dockerfile was pulled from aanand/wait: https://github.com/aanand/docker-wait
