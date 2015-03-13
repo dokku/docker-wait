@@ -26,12 +26,12 @@ fi
 # find the host(s) associated with each of the ports
 # and wait until that port responds
 if [ -n "$ports" ]; then
+  echo "waiting for TCP connections"
+
   for port in $(echo $ports | sed -e 's/,/ /g' -e 's/\s+/\n/g' | uniq)
   do
     for host in $(env | grep PORT_${port}_TCP_ADDR | cut -d = -f 2 | uniq)
     do
-      echo -n "waiting for TCP connections $host:$port..."
-
       seconds=0
       while [ "$seconds" -lt "$timeout" ] && ! nc -z -w1 $host $port
       do
@@ -41,9 +41,9 @@ if [ -n "$ports" ]; then
       done
 
       if [ "$seconds" -lt "$timeout" ]; then
-        echo -n "up!"
+        echo -n "$host:$port up!"
       else
-        echo -n "WARN: unable to connect"
+        echo -n "$host:$port WARN: unable to connect"
       fi
       echo -n '\n'
     done
