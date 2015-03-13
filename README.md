@@ -4,7 +4,8 @@ The default operation looks for a single exported port. Use it like this:
 
     $ docker run -d --name mycontainer some-image-or-other
     $ docker run --link mycontainer:mycontainer n3llyb0y/wait
-    waiting for TCP connection to 172.17.0.105:5432......ok
+    waiting for TCP connections
+    172.17.0.105:5432 up!
 
 note: it doesn't matter what the link alias is.
 
@@ -14,23 +15,26 @@ variable at run:
 
     $ docker run -d --name mycontainer some-image-or-other
     $ docker run -e PORTS=80,443 --link mycontainer:mycontainer n3llyb0y/wait
-    waiting for TCP connection to 172.17.0.105:80......ok
-    waiting for TCP connection to 172.17.0.105:443......ok
+    waiting for TCP connections
+    172.17.0.105:80 up!
+    172.17.0.105:443 up!
 
 `wait` will also interrogate linked services that share the same port (as within a cluster, for example)
 
     $ docker run -d -p 9200 --name cluster1 some-image-or-other
     $ docker run -d -p 9200 --name cluster2 some-image-or-other
     $ docker run -e PORTS=9200 --link cluster1:w1 --link cluster2:w2 n3llyb0y/wait
-    waiting for TCP connection to 172.17.0.105:9200......ok
-    waiting for TCP connection to 172.17.0.106:9200......ok
+    waiting for TCP connections
+    172.17.0.105:9200 up!
+    ........172.17.0.106:9200 up!
 
 By default each connection attempt will bail after 30 seconds. You can specify an override using the TIMEOUT env variable:
 
     $ docker run -d -p 9200 -p 32000 --name myservice some-image-or-other
     $ docker run -e PORTS="9200 32000" -e TIMEOUT=10 --link myservice:w1 n3llyb0y/wait
-    waiting for TCP connection to 172.17.0.105:9200...ok
-    waiting for TCP connection to 172.17.0.105:32000............WARN: unable to connect
+    waiting for TCP connections
+    172.17.0.105:9200 up!
+    ..............................172.17.0.105:32000 WARN: unable to connect
 
 **experimental usage in docker-compose.yml**
 
@@ -63,8 +67,9 @@ Rather than using `docker-compose up`, instead use
 This launches the linked services and backgrounds them, then returns control after the wait container finishes. It looks like this might need to be tweaked for future versions of docker-compose but as of version `1.1.0` it does just what I need.
 
 **TODO**
-The echo output seems to drop the initial `waiting for...` for subsequent hosts. This needs a workaround or better explanation of why that happens and a proper fix.
+Better echo output
+Some tests would be good
 
-credits
+**credits**
 
 The single port usage idea and dockerfile was pulled from aanand/wait: https://github.com/aanand/docker-wait
