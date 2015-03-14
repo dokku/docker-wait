@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -39,9 +39,9 @@ do
   done
 
   if [ "$seconds" -lt "$timeout" ]; then
-    echo "  $host:$port up!"
+    echo "  up!"
   else
-    echo "  $host:$port ERROR: unable to connect" >&2
+    echo "  ERROR: unable to connect" >&2
     exit 1
   fi
 done
