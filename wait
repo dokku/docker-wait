@@ -9,7 +9,7 @@ if [ -z "$TARGETS" ]; then
   # empty TARGETS variable will default to checking all host/ports exposed
   uris=$(env | grep _TCP= | cut -d= -f2 | cut -c7- )
 
-  if [ $(echo $ports | wc -w) -lt 1 ]; then
+  if [ $(echo $uris | wc -w) -lt 1 ]; then
     echo "The linked container(s) export no ports and you didn't specify any manual targets. Exiting" >&2
     exit 1
   fi
