@@ -50,7 +50,8 @@ if [ -z "$TARGETS" ]; then
   uris=$(env | grep _TCP= | cut -d= -f2 | cut -c7- )
 
   if [ $(echo $uris | wc -w) -lt 1 ]; then
-    echo "The linked container(s) export no ports and you didn't specify any manual targets. Exiting" >&2
+    echo "The linked container(s) export no ports and you didn't specify any manual targets." >&2
+    usage
     exit 1
   fi
 else
@@ -59,7 +60,8 @@ fi
 
 # wait for each target
 if [ -z "$uris" ]; then
-  echo "No wait targets found. Exiting" >&2
+  echo "No wait targets found." >&2
+  usage
   exit 1
 fi
 
