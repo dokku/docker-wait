@@ -1,7 +1,7 @@
-FROM debian
+FROM alpine:3.1
 MAINTAINER Neil Chambers <n3llyb0y.uk@gmail.com>
 
-RUN apt-get update && apt-get install -y netcat
+RUN apk add --update-cache bash grep sed netcat-openbsd && rm -rf /var/cache/apk/*
 
 ADD wait /wait
 
