@@ -1,8 +1,48 @@
 #!/bin/sh
 
+
+usage() {
+    echo ""
+    echo "usage: $0 [-p] [-t]"
+    echo ""
+    echo "optional arguments:"
+    echo " -p    host:port to wait for, multiple seperated by comma"
+    echo " -t    timeout after which connection attempt will fail, default 30"
+    echo ""
+    echo " Example: $0 -p google.com:443,github.com:443 -t 15"
+}
+
 set -e
 
 timeout=${TIMEOUT:-30}
+
+# Parse arguments
+while getopts ":t:p:" opt; do
+    case $opt in
+        t)
+            TIMEOUT=$OPTARG
+            if ! echo "$TIMEOUT" | grep -qE ^[0-9]+$; then
+              echo "Invalid timeout number: $TIMEOUT" >&2
+              exit 1
+            fi
+            ;;
+        p)
+            TARGETS="$OPTARG"
+            ;;
+        \?)
+            set +x
+            echo "Invalid option: -$OPTARG" >&2
+            usage
+            exit 1
+            ;;
+        :)
+            set +x
+            echo "Option -$OPTARG requires an argument." >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 # our target format is a newline-delimited list where each item is "host:ip"
 if [ -z "$TARGETS" ]; then
