@@ -14,10 +14,10 @@ It doesn't matter what the link alias is.
 
 If you want to wait for only a subset of the links/ports, or you want to connect
 to hosts/ports that haven't been linked by Docker, you can provide the list with
-the `-p` parameter:
+the `-c` parameter:
 
 ```shell
-$ docker run --rm martin/wait -p 8.8.8.8:53,github.com:443
+$ docker run --rm martin/wait -c 8.8.8.8:53,github.com:443
 waiting for 8.8.8.8:53  .  up!
 waiting for github.com:443  .  up!
 Everything is up
@@ -26,7 +26,7 @@ Everything is up
 By default each connection attempt will bail after 30 seconds. You can override this with `-t` parameter:
 
 ```shell
-$ docker run martin/wait -p github.com:5432 -t 15
+$ docker run martin/wait -c github.com:5432 -t 15
 waiting for github.com:5432  ...............................  ERROR: unable to connect
 ```
 

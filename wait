@@ -3,13 +3,13 @@
 
 usage() {
     echo ""
-    echo "usage: $0 [-p] [-t]"
+    echo "usage: $0 [-c] [-t]"
     echo ""
     echo "optional arguments:"
-    echo " -p    host:port to wait for, multiple seperated by comma"
+    echo " -c    connection(s) to wait for, host:port, multiple seperated by comma"
     echo " -t    timeout after which connection attempt will fail, default 30"
     echo ""
-    echo " Example: $0 -p google.com:443,github.com:443 -t 15"
+    echo " Example: $0 -c google.com:443,github.com:443 -t 15"
 }
 
 set -e
@@ -17,7 +17,7 @@ set -e
 timeout=${TIMEOUT:-30}
 
 # Parse arguments
-while getopts ":t:p:" opt; do
+while getopts ":t:c:" opt; do
     case $opt in
         t)
             TIMEOUT=$OPTARG
@@ -26,7 +26,7 @@ while getopts ":t:p:" opt; do
               exit 1
             fi
             ;;
-        p)
+        c)
             TARGETS="$OPTARG"
             ;;
         \?)
