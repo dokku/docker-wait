@@ -3,13 +3,15 @@
 
 usage() {
     echo ""
-    echo "usage: $0 [-c] [-t]"
+    echo "usage: $0 [-p] [-c] [-t]"
     echo ""
     echo "optional arguments:"
-    echo " -c    connection(s) to wait for, host:port, multiple seperated by comma"
+    echo " -p    only test exposed ports from the linked container that are in this list"
+    echo " -c    custom connection(s) to test, host:port, multiple seperated by comma"
     echo " -t    timeout after which connection attempt will fail, default 30"
     echo ""
     echo " Example: $0 -c google.com:443,github.com:443 -t 15"
+    echo "          $0 -p 8080"
 }
 
 set -e
@@ -17,7 +19,7 @@ set -e
 timeout=${TIMEOUT:-30}
 
 # Parse arguments
-while getopts ":t:c:" opt; do
+while getopts ":t:c:p:" opt; do
     case $opt in
         t)
             TIMEOUT=$OPTARG
@@ -28,6 +30,9 @@ while getopts ":t:c:" opt; do
             ;;
         c)
             TARGETS="$OPTARG"
+            ;;
+        p)
+            PORTS="$OPTARG"
             ;;
         \?)
             set +x
@@ -44,10 +49,37 @@ while getopts ":t:c:" opt; do
     esac
 done
 
+if [ -n "$PORTS" ]; then
+  ports=$(echo $PORTS | sed -e 's/,/ /g' -e 's/\s+/\n/g')
+fi
+
 # our target format is a newline-delimited list where each item is "host:ip"
 if [ -z "$TARGETS" ]; then
   # empty TARGETS variable will default to checking all host/ports exposed
   uris=$(env | grep _TCP= | cut -d= -f2 | cut -c7- )
+
+  if [ -n "$PORTS" ]; then
+    urisinc=""
+    for uri in $uris
+    do
+      port=$(echo $uri | cut -d: -f2)
+      [ -n "${port}" ]
+      #check if port should be checked
+      for portex in $ports
+      do
+        if [ $portex = $port ]; then
+          if [ -z "$uriinc" ]; then 
+            urisinc="$urisinc $uri"
+          else
+            urisinc="$uri"
+          fi
+          continue 2
+        fi
+      done
+      echo "Not checking $uri because port is not included."
+    done
+    uris=$urisinc
+  fi
 
   if [ $(echo $uris | wc -w) -lt 1 ]; then
     echo "The linked container(s) export no ports and you didn't specify any manual targets." >&2
