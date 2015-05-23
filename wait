@@ -72,15 +72,22 @@ do
   [ -n "${host}" ]
   [ -n "${port}" ]
   echo -n "Waiting for ${uri}  ."
-  seconds=0
-  while [ "$seconds" -lt "$timeout" ] && ! nc -z -w1 $host $port
+  timestamp="$(date +%s)"
+  totalelapseds=0
+  totalalloweds=$timeout
+  while [ "$totalelapseds" -lt "$totalalloweds" ] && ! nc -z -w 1 $host $port
   do
-    echo -n .
-    seconds=$((seconds+1))
-    sleep 1
+    elapseds="$((($(date +%s)-$timestamp)))"
+    if [ $elapseds -lt 1 ]; then
+      sleep 1
+      elapseds=$(($elapseds+1))
+    fi
+    totalelapseds=$(($totalelapseds+$elapseds))
+    echo -n '.'
+    timestamp="$(date +%s%N)"
   done
 
-  if [ "$seconds" -lt "$timeout" ]; then
+  if [ "$totalelapseds" -lt "$totalalloweds" ]; then
     echo "  up!"
   else
     echo "  ERROR: unable to connect" >&2
