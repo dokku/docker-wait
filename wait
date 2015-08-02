@@ -22,9 +22,9 @@ timeout=${TIMEOUT:-30}
 while getopts ":t:c:p:" opt; do
     case $opt in
         t)
-            TIMEOUT=$OPTARG
-            if ! echo "$TIMEOUT" | grep -qE ^[0-9]+$; then
-              echo "Invalid timeout number: $TIMEOUT" >&2
+            timeout=$OPTARG
+            if ! echo "$timeout" | grep -qE ^[0-9]+$; then
+              echo "Invalid timeout number: $timeout" >&2
               exit 1
             fi
             ;;
