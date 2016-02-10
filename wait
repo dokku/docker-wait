@@ -5,12 +5,23 @@ set -e
 host=$(env | grep _TCP_ADDR | head -1 | cut -d = -f 2)
 port=$(env | grep _TCP_PORT | head -1 | cut -d = -f 2)
 
-echo -n "waiting for TCP connection to $host:$port..."
+# assuming a timeout of 30 second should be enough for a container ?
+TIMEOUT=30
 
+echo -n "waiting for TCP connection to $host:$port ..."
+COUNTER=0
 while ! nc -w 1 $host $port 2>/dev/null
 do
-  echo -n .
-  sleep 1
+    if [[ $COUNTER -lt $TIMEOUT ]]; then
+        echo -n .
+        sleep 1
+        COUNTER=$((COUNTER+1))
+    else
+        echo "No TCP connection received on $host:$port "
+        break
+    fi
 done
 
-echo 'ok'
+if [[ $COUNTER -lt $TIMEOUT ]]; then
+    echo " OK"
+fi
