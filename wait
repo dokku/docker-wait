@@ -1,17 +1,17 @@
-#!/bin/sh
-
+#!/bin/bash
+set -eo pipefail
 
 usage() {
-    echo ""
-    echo "usage: $0 [-p] [-c] [-t]"
-    echo ""
-    echo "optional arguments:"
-    echo " -p    only test exposed ports from the linked container that are in this list"
-    echo " -c    custom connection(s) to test, host:port, multiple seperated by comma"
-    echo " -t    timeout after which connection attempt will fail, default 30"
-    echo ""
-    echo " Example: $0 -c google.com:443,github.com:443 -t 15"
-    echo "          $0 -p 8080"
+  echo ""
+  echo "usage: $0 [-p] [-c] [-t]"
+  echo ""
+  echo "optional arguments:"
+  echo " -p    only test exposed ports from the linked container that are in this list"
+  echo " -c    custom connection(s) to test, host:port, multiple seperated by comma"
+  echo " -t    timeout after which connection attempt will fail, default 30"
+  echo ""
+  echo " Example: $0 -c google.com:443,github.com:443 -t 15"
+  echo "          $0 -p 8080"
 }
 
 set -e
@@ -20,110 +20,110 @@ timeout=${TIMEOUT:-30}
 
 # Parse arguments
 while getopts ":t:c:p:" opt; do
-    case $opt in
-        t)
-            timeout=$OPTARG
-            if ! echo "$timeout" | grep -qE ^[0-9]+$; then
-              echo "Invalid timeout number: $timeout" >&2
-              exit 1
-            fi
-            ;;
-        c)
-            TARGETS="$OPTARG"
-            ;;
-        p)
-            PORTS="$OPTARG"
-            ;;
-        \?)
-            set +x
-            echo "Invalid option: -$OPTARG" >&2
-            usage
-            exit 1
-            ;;
-        :)
-            set +x
-            echo "Option -$OPTARG requires an argument." >&2
-            usage
-            exit 1
-            ;;
-    esac
+  case $opt in
+  t)
+    timeout=$OPTARG
+    if ! echo "$timeout" | grep -qE '^[0-9]+$'; then
+      echo "Invalid timeout number: $timeout" >&2
+      exit 1
+    fi
+    ;;
+  c)
+    TARGETS="$OPTARG"
+    ;;
+  p)
+    PORTS="$OPTARG"
+    ;;
+  \?)
+    set +x
+    echo "Invalid option: -$OPTARG" >&2
+    usage
+    exit 1
+    ;;
+  :)
+    set +x
+    echo "Option -$OPTARG requires an argument." >&2
+    usage
+    exit 1
+    ;;
+  esac
 done
 
-if [ -n "$PORTS" ]; then
-  ports=$(echo $PORTS | sed -e 's/,/ /g' -e 's/\s+/\n/g')
+if [[ -n "$PORTS" ]]; then
+  ports=$(echo "$PORTS" | sed -e 's/,/ /g' -e 's/\s+/\n/g')
 fi
 
 # our target format is a newline-delimited list where each item is "host:ip"
-if [ -z "$TARGETS" ]; then
+if [[ -z "$TARGETS" ]]; then
   # empty TARGETS variable will default to checking all host/ports exposed
-  uris=$(env | grep _TCP= | cut -d= -f2 | cut -c7- )
+  uris=$(env | grep _TCP= | cut -d= -f2 | cut -c7-)
 
-  if [ -n "$PORTS" ]; then
+  if [[ -n "$PORTS" ]]; then
     urisinc=""
-    for uri in $uris
-    do
-      port=$(echo $uri | cut -d: -f2)
-      [ -n "${port}" ]
-      #check if port should be checked
-      for portex in $ports
-      do
-        if [ $portex = $port ]; then
-          if [ -z "$uriinc" ]; then
-            urisinc="$urisinc $uri"
-          else
-            urisinc="$uri"
+    for uri in $uris; do
+      port=$(echo "$uri" | cut -d: -f2)
+      if [[ -n "${port}" ]]; then
+        #check if port should be checked
+        for portex in $ports; do
+          if [[ "$portex" == "$port" ]]; then
+            if [[ -z "$urisinc" ]]; then
+              urisinc="$urisinc $uri"
+            else
+              urisinc="$uri"
+            fi
+            continue 2
           fi
-          continue 2
-        fi
-      done
-      echo "Not checking $uri because port is not included."
+        done
+      else
+        echo "Not checking $uri because port is not included."
+      fi
     done
     uris=$urisinc
   fi
 
-  if [ $(echo $uris | wc -w) -lt 1 ]; then
+  if [[ $(echo "$uris" | wc -w) -lt 1 ]]; then
     echo "The linked container(s) export no ports and you didn't specify any manual targets." >&2
     usage
     exit 1
   fi
 else
-  uris=$(echo $TARGETS | sed -e 's/,/ /g' -e 's/\s+/\n/g' | uniq)
+  uris=$(echo "$TARGETS" | sed -e 's/,/ /g' -e 's/\s+/\n/g' | uniq)
 fi
 
 # wait for each target
-if [ -z "$uris" ]; then
+if [[ -z "$uris" ]]; then
   echo "No wait targets found." >&2
   usage
   exit 1
 fi
 
-for uri in $uris
-do
-  host=$(echo $uri | cut -d: -f1)
-  port=$(echo $uri | cut -d: -f2)
-  [ -n "${host}" ]
-  [ -n "${port}" ]
-  echo -n "Waiting for ${uri}  ."
-  timestamp="$(date +%s)"
-  totalelapseds=0
-  totalalloweds=$timeout
-  while [ "$totalelapseds" -lt "$totalalloweds" ] && ! nc -z -w 1 $host $port
-  do
-    elapseds="$((($(date +%s)-$timestamp)))"
-    if [ $elapseds -lt 1 ]; then
-      sleep 1
-      elapseds=$(($elapseds+1))
-    fi
-    totalelapseds=$(($totalelapseds+$elapseds))
-    echo -n '.'
-    timestamp="$(date +%s%N)"
-  done
+for uri in $uris; do
+  host=$(echo "$uri" | cut -d: -f1)
+  port=$(echo "$uri" | cut -d: -f2)
+  if [[ -n "${host}" ]] && [[ -n "${port}" ]]; then
+    echo -n "Waiting for ${uri}  ."
+    timestamp="$(date +%s)"
+    totalelapseds=0
+    totalalloweds=$timeout
+    while [[ "$totalelapseds" -lt "$totalalloweds" ]] && ! nc -z -w 1 "$host" "$port"; do
+      elapseds="$((($(date +%s) - timestamp)))"
+      if [[ $elapseds -lt 1 ]]; then
+        sleep 1
+        elapseds=$((elapseds + 1))
+      fi
+      totalelapseds=$((totalelapseds + elapseds))
+      echo -n '.'
+      timestamp="$(date +%s%N)"
+    done
 
-  if [ "$totalelapseds" -lt "$totalalloweds" ]; then
-    echo "  up!"
+    if [[ "$totalelapseds" -lt "$totalalloweds" ]]; then
+      echo "  up!"
+    else
+      echo "  ERROR: unable to connect" >&2
+      exit 1
+    fi
   else
-    echo "  ERROR: unable to connect" >&2
-    exit 1
+    echo "  SKIP: Missing host or port in $uri"
   fi
 done
 echo "Everything is up"
