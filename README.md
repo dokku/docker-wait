@@ -8,7 +8,7 @@ The default operation looks up all the `EXPOSE`d ports of all the linked contain
 
 ```shell
 $ docker run -d --name mycontainer some-image-or-other
-$ docker run --link mycontainer:mycontainer --rm martin/wait
+$ docker run --link mycontainer:mycontainer --rm dokku/wait
 Waiting for 172.17.0.105:5432  .  up!
 Everything is up
 ```
@@ -19,7 +19,7 @@ If you want to wait for only a subset of the ports in a linked container, you ca
 
 ```shell
 $ docker run -d --name mycontainer some-image-or-other
-$ docker run --link mycontainer:mycontainer --rm martin/wait -p 5432
+$ docker run --link mycontainer:mycontainer --rm dokku/wait -p 5432
 Not checking 172.17.0.105:6379 because port is not included.
 Waiting for 172.17.0.105:5432  .  up!
 Everything is up
@@ -29,7 +29,7 @@ Everything is up
 If you want to connect to hosts/ports that haven't been linked by Docker, you can provide the list with the `-c` parameter:
 
 ```shell
-$ docker run --rm martin/wait -c 8.8.8.8:53,github.com:443
+$ docker run --rm dokku/wait -c 8.8.8.8:53,github.com:443
 Waiting for 8.8.8.8:53  .  up!
 Waiting for github.com:443  .  up!
 Everything is up
@@ -38,7 +38,7 @@ Everything is up
 By default each connection attempt will bail after 30 seconds. You can override this with `-t` parameter:
 
 ```shell
-$ docker run martin/wait -c github.com:5432 -t 15
+$ docker run dokku/wait -c github.com:5432 -t 15
 Waiting for github.com:5432  ...............................  ERROR: unable to connect
 ```
 
