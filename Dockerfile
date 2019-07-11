@@ -4,6 +4,6 @@ MAINTAINER Jose Diaz-Gonzalez <dokku@josediazgonzalez.com>
 
 RUN apk --no-cache add bash grep sed netcat-openbsd
 
-ADD wait /wait
+ADD entrypoint /entrypoint
 
-ENTRYPOINT ["/wait"]
+ENTRYPOINT ["/entrypoint"]
