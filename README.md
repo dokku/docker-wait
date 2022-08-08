@@ -25,7 +25,6 @@ Waiting for 172.17.0.105:5432  .  up!
 Everything is up
 ```
 
-
 If you want to connect to hosts/ports that haven't been linked by Docker, you can provide the list with the `-c` parameter:
 
 ```shell
@@ -44,8 +43,8 @@ Waiting for github.com:5432  ...............................  ERROR: unable to c
 
 If any connection times out, the `wait` container immediately exits with status code 1
 
-**credits**
+## credits
 
-waisbrot/wait: https://github.com/waisbrot/docker-wait
-n3llyb0y/wait: https://github.com/n3llyb0y/docker-wait
-aanand/wait: https://github.com/aanand/docker-wait
+[waisbrot/wait](https://github.com/waisbrot/docker-wait)
+[n3llyb0y/wait](https://github.com/n3llyb0y/docker-wait)
+[aanand/wait](https://github.com/aanand/docker-wait)
