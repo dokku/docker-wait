@@ -21,31 +21,31 @@ timeout=${TIMEOUT:-30}
 # Parse arguments
 while getopts ":t:c:p:" opt; do
   case $opt in
-    t)
-      timeout=$OPTARG
-      if ! echo "$timeout" | grep -qE '^[0-9]+$'; then
-        echo "Invalid timeout number: $timeout" >&2
-        exit 1
-      fi
-      ;;
-    c)
-      TARGETS="$OPTARG"
-      ;;
-    p)
-      PORTS="$OPTARG"
-      ;;
-    \?)
-      set +x
-      echo "Invalid option: -$OPTARG" >&2
-      usage
+  t)
+    timeout=$OPTARG
+    if ! echo "$timeout" | grep -qE '^[0-9]+$'; then
+      echo "Invalid timeout number: $timeout" >&2
       exit 1
-      ;;
-    :)
-      set +x
-      echo "Option -$OPTARG requires an argument." >&2
-      usage
-      exit 1
-      ;;
+    fi
+    ;;
+  c)
+    TARGETS="$OPTARG"
+    ;;
+  p)
+    PORTS="$OPTARG"
+    ;;
+  \?)
+    set +x
+    echo "Invalid option: -$OPTARG" >&2
+    usage
+    exit 1
+    ;;
+  :)
+    set +x
+    echo "Option -$OPTARG requires an argument." >&2
+    usage
+    exit 1
+    ;;
   esac
 done
 
