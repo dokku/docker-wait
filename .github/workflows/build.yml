@@ -16,7 +16,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            dokku/ambassador
+            dokku/wait
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
