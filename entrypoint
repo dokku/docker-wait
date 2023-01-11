@@ -106,7 +106,8 @@ for uri in $uris; do
     totalelapseds=0
     totalalloweds=$timeout
     while [[ "$totalelapseds" -lt "$totalalloweds" ]] && ! nc -z -w 1 "$host" "$port"; do
-      elapseds="$((($(date +%s) - timestamp)))"
+      current_date="$(date +%s)"
+      elapseds="$((current_date - timestamp))"
       if [[ $elapseds -lt 1 ]]; then
         sleep 1
         elapseds=$((elapseds + 1))
