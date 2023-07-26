@@ -1,8 +1,8 @@
 # docker-wait
 
-[![dokku/wait](http://dockeri.co/image/dokku/wait)](https://registry.hub.docker.com/r/dokku/wait/)
+[![dokku/wait](http://dockeri.co/image/dokku/wait)](https://hub.docker.com/r/dokku/wait/)
 
-`wait` is a really small (9MB) Docker utility that blocks until another container is accepting TCP connections, and errors-out if it cannot connect within a given timeout. It can be used to ensure that a service is up and running before starting another service that depends on it.
+`wait` is a really small (4MB) Docker utility that blocks until another container is accepting TCP connections, and errors-out if it cannot connect within a given timeout. It can be used to ensure that a service is up and running before starting another service that depends on it.
 
 The default operation looks up all the `EXPOSE`d ports of all the linked containers and waits for them
 
