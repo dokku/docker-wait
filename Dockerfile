@@ -1,4 +1,4 @@
-FROM alpine:3.23.4
+FROM alpine:3.24.0
 
 # hadolint ignore=DL3018
 RUN apk --no-cache add bash grep sed netcat-openbsd
